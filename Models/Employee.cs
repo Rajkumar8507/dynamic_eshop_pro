@@ -11,11 +11,13 @@ namespace dynamic_eshop_pro.Models
     public class Employee
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         public string Name { get; set; }
-        [ForeignKey(nameof(Employee_dept.Id))]
-        public int DepartmentId { get; set; }
+        
+        public int Dept_id { get; set; }
         public string phoneNo {  get; set; }
+      
         public Employee_dept Employee_Dept { get; set; }    
     }
 }

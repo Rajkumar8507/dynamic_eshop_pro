@@ -3,35 +3,79 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using dynamic_eshop_pro.DAL;
+using dynamic_eshop_pro.DALEntity;
 using dynamic_eshop_pro.Models;
 
 namespace dynamic_eshop_pro.Controllers
 {
     public class EmployeeController : Controller
     {
-         Context c=null;
+         EmployeeContext context=null;
         public EmployeeController()
         {
-            c= new Context();
+            context= new EmployeeContext();
         }
         public ActionResult Index()
         {
-            List<Employee> employees = c.GetEmployees();
-           
-
-
-            return View(employees);
+            List<Employee> elist =context.employees.Include("Employee_Dept").ToList(); 
+            return View(elist);
         }
-        public ActionResult create()
+       
+        public ActionResult Create()
         {
-             return View();
+            List<Employee_dept> dlist=context.employee_dept.ToList();
+            List<SelectListItem> selectlist=new List<SelectListItem>();
+            foreach(Employee_dept x in dlist)
+            {
+                selectlist.Add(new SelectListItem() { Text = x.DepartmentName, Value = x.Dept_Id.ToString()});
+            }
+            ViewData["Dept_id"]= selectlist;
+            return View();
         }
         [HttpPost]
-        public ActionResult create(Employee e) 
+        public ActionResult Create(Employee emp)
         {
-            c.AddEmployee(e);
-            return View();
+            context.employees.Add(emp); 
+            context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            Employee e=context.employees.Find(id);
+            List<Employee_dept> dlist=context.employee_dept.ToList();
+            List<SelectListItem> selectlist=new List<SelectListItem>();
+            foreach(Employee_dept x in dlist)
+            {
+                selectlist.Add(new SelectListItem() { Text = x.DepartmentName, Value = x.Dept_Id.ToString() });
+            }
+            ViewData["Dept_id"]=selectlist;
+            return View(e);
+        }
+        [HttpPost]
+        public ActionResult Edit(Employee emp)
+        {
+            Employee e=context.employees.Find(emp.Id);
+            e.Name= emp.Name;
+            e.phoneNo=emp.phoneNo;
+            e.Dept_id=emp.Dept_id;
+           
+            context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        [HttpGet]  
+        public ActionResult Delete(int id)
+        {
+            Employee emp = context.employees.Find(id);
+            context.employees.Remove(emp);
+            context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public ActionResult Details(int id)
+        {
+            Employee emp=context.employees.Find(id);   
+            return View(emp);
         }
     }
 }
